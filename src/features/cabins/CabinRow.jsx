@@ -1,9 +1,10 @@
 import styled from "styled-components";
 import { formatCurrency } from "../../utils/helpers";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteCabin } from "../../services/apiCabins";
-import toast from "react-hot-toast";
 import Button from "../../ui/Button";
+import { useState } from "react";
+import CreateCabinForm from "./CreateCabinForm";
+import { useDeleteCabin } from "./useDeleteCabin";
+import { useCreateCabin } from "./useCreateCabin";
 
 const TableRow = styled.div`
   display: grid;
@@ -44,40 +45,73 @@ const Discount = styled.div`
   color: var(--color-green-700);
 `;
 
+const StyledDiv = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
 export default function CabinRow({ cabin }) {
+  const { createCabin, isCreating } = useCreateCabin();
+  const { isDeleting, deleteCabin } = useDeleteCabin();
+
+  const [showFrom, setShowForm] = useState(false);
   const { id, image, name, description, discount, maxCapacity, regularPrice } =
     cabin;
 
-  const queryClient = useQueryClient();
-
-  const { isLoading, mutate } = useMutation({
-    mutationFn: deleteCabin,
-
-    onSuccess: () => {
-      toast.success("Cabin successfully deleted.");
-      queryClient.invalidateQueries({
-        queryKey: ["cabin"],
-      });
-    },
-
-    onError: (error) => toast.error(error.message),
-  });
+  function handleCopy() {
+    createCabin({
+      name: `Copy of ${name}`,
+      maxCapacity,
+      regularPrice,
+      discount,
+      image,
+      description,
+    });
+  }
 
   return (
-    <TableRow>
-      <Img src={image} alt={name} />
-      <Cabin>{name}</Cabin>
-      <div>Fits up to {maxCapacity} guests</div>
-      <Price>{formatCurrency(regularPrice)}</Price>
-      <Discount>{formatCurrency(discount)}</Discount>
-      <Button
-        size="small"
-        variation="secondary"
-        onClick={() => mutate(id)}
-        disabled={isLoading}
-      >
-        Delete
-      </Button>
-    </TableRow>
+    <>
+      <TableRow>
+        <Img src={image} alt={name} />
+        <Cabin>{name}</Cabin>
+        <div>Fits up to {maxCapacity} guests</div>
+        <Price>{formatCurrency(regularPrice)}</Price>
+        {discount ? (
+          <Discount>{formatCurrency(discount)}</Discount>
+        ) : (
+          <span>&mdash;</span>
+        )}
+
+        <StyledDiv>
+          <Button
+            size="small"
+            variation="primary"
+            onClick={handleCopy}
+            disabled={isCreating}
+          >
+            Copy
+          </Button>
+
+          <Button
+            size="small"
+            variation="primary"
+            onClick={() => setShowForm(!showFrom)}
+          >
+            Edit
+          </Button>
+
+          <Button
+            size="small"
+            variation="secondary"
+            onClick={() => deleteCabin(id)}
+            disabled={isDeleting}
+          >
+            Delete
+          </Button>
+        </StyledDiv>
+      </TableRow>
+      {showFrom && <CreateCabinForm cabinToEdit={cabin} />}
+    </>
   );
 }

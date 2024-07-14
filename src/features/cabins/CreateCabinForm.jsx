@@ -5,11 +5,11 @@ import Form from "../../ui/Form";
 import Button from "../../ui/Button";
 import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
-import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createCabin } from "../../services/apiCabins";
-import toast from "react-hot-toast";
 import Spinner from "../../ui/Spinner";
+
+import { useForm } from "react-hook-form";
+import { useCreateCabin } from "./useCreateCabin";
+import { useEditCabin } from "./useEditCabin";
 
 const FormRow = styled.div`
   display: grid;
@@ -47,33 +47,43 @@ const Error = styled.span`
   color: var(--color-red-700);
 `;
 
-function CreateCabinForm() {
-  const { register, handleSubmit, reset, getValues, formState } = useForm();
+function CreateCabinForm({ cabinToEdit = {} }) {
+  const { createCabin, isCreating } = useCreateCabin();
+  const { editCabin, isEditing } = useEditCabin();
 
-  const queryClient = useQueryClient();
-  const { mutate, isLoading } = useMutation({
-    mutationFn: createCabin,
+  const { id: editId, ...editValues } = cabinToEdit;
+  const isEdit = Boolean(editId);
 
-    onSuccess: () => {
-      toast.success("Cabin successfully created");
-      queryClient.invalidateQueries({
-        queryKey: ["cabin"],
-      });
-      reset();
-    },
-
-    onError: (error) => toast.error(error.message),
+  const { register, handleSubmit, reset, getValues, formState } = useForm({
+    defaultValues: isEdit ? editValues : {},
   });
 
+  const isWorking = isCreating || isEditing;
+
   function handleFormSubmit(data) {
-    mutate(data);
+    const image = typeof data.image === "string" ? data.image : data.image[0];
+
+    if (isEdit)
+      editCabin(
+        { newCabin: { ...data, image }, id: editId },
+        {
+          onSuccess: () => reset(),
+        }
+      );
+    else
+      createCabin(
+        { ...data, image },
+        {
+          onSuccess: () => reset(),
+        }
+      );
   }
 
-  // function onError(errors) {
-  //   console.log(errors);
-  // }
+  function onError(errors) {
+    // console.log(errors);
+  }
 
-  if (isLoading) return <Spinner />;
+  if (isWorking) return <Spinner />;
 
   return (
     <Form onSubmit={handleSubmit(handleFormSubmit, onError)}>
@@ -136,7 +146,7 @@ function CreateCabinForm() {
           {...register("discount", {
             required: "This field is required.",
             validate: (value) =>
-              value <= getValues().regularPrice ||
+              +value <= +getValues().regularPrice ||
               "Discount should be less than price",
           })}
         />
@@ -162,7 +172,16 @@ function CreateCabinForm() {
 
       <FormRow>
         <Label htmlFor="image">Cabin photo</Label>
-        <FileInput id="image" accept="image/*" {...register("image")} />
+        <FileInput
+          id="image"
+          accept="image/*"
+          {...register("image", {
+            required: isEdit ? false : "This field is required",
+          })}
+        />
+        {formState.errors?.image?.message && (
+          <Error>{formState.errors?.description?.message}</Error>
+        )}
       </FormRow>
 
       <FormRow>
@@ -170,7 +189,9 @@ function CreateCabinForm() {
         <Button variation="secondary" type="reset">
           Cancel
         </Button>
-        <Button disabled={isLoading}>Add cabin</Button>
+        <Button disabled={isWorking}>
+          {isEdit ? "Edit cabin " : "Add cabin"}
+        </Button>
       </FormRow>
     </Form>
   );
