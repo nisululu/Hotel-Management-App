@@ -1,22 +1,12 @@
 import styled from "styled-components";
 import { formatCurrency } from "../../utils/helpers";
 import Button from "../../ui/Button";
-import { useState } from "react";
 import CreateCabinForm from "./CreateCabinForm";
 import { useDeleteCabin } from "./useDeleteCabin";
 import { useCreateCabin } from "./useCreateCabin";
-
-const TableRow = styled.div`
-  display: grid;
-  grid-template-columns: 0.6fr 1.8fr 2.2fr 1fr 1fr 1fr;
-  column-gap: 2.4rem;
-  align-items: center;
-  padding: 1.4rem 2.4rem;
-
-  &:not(:last-child) {
-    border-bottom: 1px solid var(--color-grey-100);
-  }
-`;
+import Modal from "../../ui/Modal";
+import ConfirmDelete from "../../ui/ConfirmDelete";
+import Table from "../../ui/Table";
 
 const Img = styled.img`
   display: block;
@@ -55,7 +45,6 @@ export default function CabinRow({ cabin }) {
   const { createCabin, isCreating } = useCreateCabin();
   const { isDeleting, deleteCabin } = useDeleteCabin();
 
-  const [showFrom, setShowForm] = useState(false);
   const { id, image, name, description, discount, maxCapacity, regularPrice } =
     cabin;
 
@@ -71,47 +60,51 @@ export default function CabinRow({ cabin }) {
   }
 
   return (
-    <>
-      <TableRow>
-        <Img src={image} alt={name} />
-        <Cabin>{name}</Cabin>
-        <div>Fits up to {maxCapacity} guests</div>
-        <Price>{formatCurrency(regularPrice)}</Price>
-        {discount ? (
-          <Discount>{formatCurrency(discount)}</Discount>
-        ) : (
-          <span>&mdash;</span>
-        )}
+    <Table.Row>
+      <Img src={image} alt={name} />
+      <Cabin>{name}</Cabin>
+      <div>Fits up to {maxCapacity} guests</div>
+      <Price>{formatCurrency(regularPrice)}</Price>
+      {discount ? (
+        <Discount>{formatCurrency(discount)}</Discount>
+      ) : (
+        <span>&mdash;</span>
+      )}
 
-        <StyledDiv>
-          <Button
-            size="small"
-            variation="primary"
-            onClick={handleCopy}
-            disabled={isCreating}
-          >
-            Copy
-          </Button>
+      <StyledDiv>
+        <Button
+          size="small"
+          variation="secondary"
+          onClick={handleCopy}
+          disabled={isCreating}
+        >
+          Copy
+        </Button>
 
-          <Button
-            size="small"
-            variation="primary"
-            onClick={() => setShowForm(!showFrom)}
-          >
-            Edit
-          </Button>
+        <Modal>
+          <Modal.Open opens="edit">
+            <Button size="small" variation="primary">
+              Edit
+            </Button>
+          </Modal.Open>
+          <Modal.Window name="edit">
+            <CreateCabinForm cabinToEdit={cabin} />
+          </Modal.Window>
 
-          <Button
-            size="small"
-            variation="secondary"
-            onClick={() => deleteCabin(id)}
-            disabled={isDeleting}
-          >
-            Delete
-          </Button>
-        </StyledDiv>
-      </TableRow>
-      {showFrom && <CreateCabinForm cabinToEdit={cabin} />}
-    </>
+          <Modal.Open opens="delete">
+            <Button size="small" variation="danger">
+              Delete
+            </Button>
+          </Modal.Open>
+          <Modal.Window name="delete">
+            <ConfirmDelete
+              resourceName={name}
+              disabled={isDeleting}
+              onConfirm={() => deleteCabin(id)}
+            />
+          </Modal.Window>
+        </Modal>
+      </StyledDiv>
+    </Table.Row>
   );
 }

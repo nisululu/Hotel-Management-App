@@ -47,7 +47,7 @@ const Error = styled.span`
   color: var(--color-red-700);
 `;
 
-function CreateCabinForm({ cabinToEdit = {} }) {
+function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
   const { createCabin, isCreating } = useCreateCabin();
   const { editCabin, isEditing } = useEditCabin();
 
@@ -67,14 +67,20 @@ function CreateCabinForm({ cabinToEdit = {} }) {
       editCabin(
         { newCabin: { ...data, image }, id: editId },
         {
-          onSuccess: () => reset(),
+          onSuccess: () => {
+            reset();
+            onCloseModal?.();
+          },
         }
       );
     else
       createCabin(
         { ...data, image },
         {
-          onSuccess: () => reset(),
+          onSuccess: () => {
+            reset();
+            onCloseModal?.();
+          },
         }
       );
   }
@@ -83,10 +89,10 @@ function CreateCabinForm({ cabinToEdit = {} }) {
     // console.log(errors);
   }
 
-  if (isWorking) return <Spinner />;
+  // if (isWorking) return <Spinner />;
 
   return (
-    <Form onSubmit={handleSubmit(handleFormSubmit, onError)}>
+    <Form onSubmit={handleSubmit(handleFormSubmit, onError)} type="modal">
       <FormRow>
         <Label htmlFor="name">Cabin name</Label>
         <Input
@@ -186,7 +192,11 @@ function CreateCabinForm({ cabinToEdit = {} }) {
 
       <FormRow>
         {/* type is an HTML attribute! */}
-        <Button variation="secondary" type="reset">
+        <Button
+          variation="secondary"
+          type="reset"
+          onClick={() => onCloseModal?.()}
+        >
           Cancel
         </Button>
         <Button disabled={isWorking}>
