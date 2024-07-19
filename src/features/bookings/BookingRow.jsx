@@ -6,6 +6,8 @@ import Table from "../../ui/Table";
 
 import { formatCurrency } from "../../utils/helpers";
 import { formatDistanceFromNow } from "../../utils/helpers";
+import Button from "../../ui/Button";
+import { useNavigate } from "react-router-dom";
 
 const Cabin = styled.div`
   font-size: 1.6rem;
@@ -34,6 +36,13 @@ const Amount = styled.div`
   font-weight: 500;
 `;
 
+const StyledDiv = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 0.5rem;
+`;
+
 function BookingRow({
   booking: {
     id: bookingId,
@@ -48,6 +57,8 @@ function BookingRow({
     cabins: { name: cabinName },
   },
 }) {
+  console.log(status);
+  const navigate = useNavigate();
   const statusToTagName = {
     unconfirmed: "blue",
     "checked-in": "green",
@@ -79,6 +90,25 @@ function BookingRow({
       <Tag type={statusToTagName[status]}>{status.replace("-", " ")}</Tag>
 
       <Amount>{formatCurrency(totalPrice)}</Amount>
+
+      <StyledDiv>
+        {status === "unconfirmed" && (
+          <Button
+            size="small"
+            variation="primary"
+            onClick={() => navigate(`/checkin/${bookingId}`)}
+          >
+            Check in
+          </Button>
+        )}
+        <Button
+          size="small"
+          variation="primary"
+          onClick={() => navigate(`/bookings/${bookingId}`)}
+        >
+          Details
+        </Button>
+      </StyledDiv>
     </Table.Row>
   );
 }
