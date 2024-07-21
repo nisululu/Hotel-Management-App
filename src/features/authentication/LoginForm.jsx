@@ -3,12 +3,30 @@ import Button from "../../ui/Button";
 import Form from "../../ui/Form";
 import Input from "../../ui/Input";
 import FormRowVertical from "../../ui/FormRowVertical";
+import { login } from "../../services/apiAuth";
+import useLogin from "./useLogin";
+import SpinnerMini from "../../ui/SpinnerMini";
+import { ButtonWhileLoading } from "../../ui/ButtonWhileLoading";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { userLogin, isLoggingIn } = useLogin();
 
-  function handleSubmit() {}
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (!email && !password) return;
+
+    userLogin(
+      { email, password },
+      {
+        onSettled: () => {
+          setEmail("");
+          setPassword("");
+        },
+      }
+    );
+  }
 
   return (
     <Form onSubmit={handleSubmit}>
@@ -32,7 +50,15 @@ function LoginForm() {
         />
       </FormRowVertical>
       <FormRowVertical>
-        <Button size="large">Login</Button>
+        <Button size="large" disabled={isLoggingIn}>
+          {!isLoggingIn ? (
+            "Login"
+          ) : (
+            <ButtonWhileLoading>
+              <SpinnerMini /> Login
+            </ButtonWhileLoading>
+          )}
+        </Button>
       </FormRowVertical>
     </Form>
   );
