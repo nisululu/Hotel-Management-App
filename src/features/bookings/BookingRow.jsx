@@ -9,6 +9,15 @@ import { formatDistanceFromNow } from "../../utils/helpers";
 import Button from "../../ui/Button";
 import { useNavigate } from "react-router-dom";
 import useCheckout from "../check-in-out/useCheckout";
+import {
+  HiOutlineArrowRightEndOnRectangle,
+  HiOutlineArrowRightStartOnRectangle,
+  HiOutlineEye,
+  HiOutlineTrash,
+} from "react-icons/hi2";
+import useDeleteBooking from "./useDeleteBooking";
+import Modal from "../../ui/Modal";
+import ConfirmDelete from "../../ui/ConfirmDelete";
 
 const Cabin = styled.div`
   font-size: 1.6rem;
@@ -61,6 +70,8 @@ function BookingRow({
   const navigate = useNavigate();
 
   const { checkout, isCheckingOut } = useCheckout();
+  const { mutate: deleteBooking, isLoading: isDeletingBooking } =
+    useDeleteBooking();
   const statusToTagName = {
     unconfirmed: "blue",
     "checked-in": "green",
@@ -97,21 +108,21 @@ function BookingRow({
         {status === "unconfirmed" && (
           <Button
             size="small"
-            variation="warning"
+            variation="secondary"
             onClick={() => navigate(`/checkin/${bookingId}`)}
           >
-            Check in
+            <HiOutlineArrowRightEndOnRectangle style={{ fontSize: "2rem" }} />
           </Button>
         )}
 
         {status === "checked-in" && (
           <Button
             size="small"
-            variation="danger"
+            variation="secondary"
             onClick={() => checkout(bookingId)}
             disabled={isCheckingOut}
           >
-            Check out
+            <HiOutlineArrowRightStartOnRectangle style={{ fontSize: "2rem" }} />
           </Button>
         )}
 
@@ -120,8 +131,23 @@ function BookingRow({
           variation="primary"
           onClick={() => navigate(`/bookings/${bookingId}`)}
         >
-          Details
+          <HiOutlineEye style={{ fontSize: "2rem" }} />
         </Button>
+
+        <Modal>
+          <Modal.Open opens="delete">
+            <Button size="small" variation="danger">
+              <HiOutlineTrash style={{ fontSize: "2rem" }} />
+            </Button>
+          </Modal.Open>
+          <Modal.Window name="delete">
+            <ConfirmDelete
+              resourceName={name}
+              disabled={isDeletingBooking}
+              onConfirm={() => deleteBooking(bookingId)}
+            />
+          </Modal.Window>
+        </Modal>
       </StyledDiv>
     </Table.Row>
   );
