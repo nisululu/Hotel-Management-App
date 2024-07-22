@@ -1,10 +1,7 @@
 import styled from "styled-components";
 import Logout from "../features/authentication/Logout";
 import UserAvatar from "../features/authentication/UserAvatar";
-import Button from "./Button";
-import ButtonIcon from "./ButtonIcon";
-import { HiOutlineUser } from "react-icons/hi2";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const StyledHeader = styled.header`
   background-color: var(--color-grey-0);
@@ -14,23 +11,19 @@ const StyledHeader = styled.header`
 
 const Ul = styled.ul`
   display: flex;
-  gap: 2rem;
+  gap: 3rem;
   align-items: center;
   justify-content: end;
 `;
 
 const Header = () => {
-  const navigate = useNavigate();
   return (
     <StyledHeader>
       <Ul>
         <li>
-          <UserAvatar />
-        </li>
-        <li>
-          <ButtonIcon onClick={() => navigate("/account")}>
-            <HiOutlineUser />
-          </ButtonIcon>
+          <Link to="/account">
+            <UserAvatar />
+          </Link>
         </li>
         <li>
           <Logout />
