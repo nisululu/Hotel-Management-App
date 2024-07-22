@@ -1,7 +1,5 @@
 import styled from "styled-components";
-import Logout from "../features/authentication/Logout";
-import UserAvatar from "../features/authentication/UserAvatar";
-import { Link } from "react-router-dom";
+import HeaderItems from "./HeaderItems";
 
 const StyledHeader = styled.header`
   background-color: var(--color-grey-0);
@@ -20,14 +18,7 @@ const Header = () => {
   return (
     <StyledHeader>
       <Ul>
-        <li>
-          <Link to="/account">
-            <UserAvatar />
-          </Link>
-        </li>
-        <li>
-          <Logout />
-        </li>
+        <HeaderItems />
       </Ul>
     </StyledHeader>
   );
