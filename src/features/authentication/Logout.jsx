@@ -9,8 +9,8 @@ function Logout() {
 
   return (
     <Button
-      size="medium"
-      variation="secondary"
+      size="small"
+      variation="danger"
       onClick={handleLogout}
       disabled={isLoading}
     >
