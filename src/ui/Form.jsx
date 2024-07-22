@@ -5,6 +5,10 @@ const Form = styled.form`
     props.type === "regular" &&
     css`
       padding: 2.4rem 4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2rem;
 
       /* Box */
       background-color: var(--color-grey-0);

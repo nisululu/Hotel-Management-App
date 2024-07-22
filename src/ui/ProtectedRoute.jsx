@@ -26,7 +26,7 @@ function ProtectedRoute({ children }) {
         <Spinner />
       </FullPage>
     );
-  if (isAuthenticated) return children;
+  if (isAuthenticated && !isLoading) return children;
 }
 
 export default ProtectedRoute;

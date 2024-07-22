@@ -5,14 +5,16 @@ import { useNavigate } from "react-router-dom";
 
 function useLogin() {
   const navigate = useNavigate();
+
   const { mutate: userLogin, isLoading: isLoggingIn } = useMutation({
     mutationFn: ({ email, password }) => login({ email, password }),
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success(`User successfully logged in.`);
-      navigate("/");
+      navigate("/dashboard", { replace: true });
     },
     onError: (error) => toast.error(error.message),
   });
+
   return { userLogin, isLoggingIn };
 }
 
